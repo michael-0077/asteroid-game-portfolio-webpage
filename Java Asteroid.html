@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asteroid Game | Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --text-primary: #e8e8ec;
+            --text-muted: #6b6b7a;
+            --accent: #5ce1e6;
+            --accent-dim: rgba(92, 225, 230, 0.15);
+            --java-orange: #f89820;
+            --javafx-blue: #5382a1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Syne', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Hero/Intro Section */
+        #hero-section {
+            min-height: 100vh;
+            background: #0a0a0f;
+            position: relative;
+        }
+
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .press-space {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: rgba(92, 225, 230, 0.7);
+            letter-spacing: 3px;
+            animation: pulse 2s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .press-space.hidden {
+            display: none;
+        }
+
+        /* Starfield */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, var(--bg-primary) 0%, transparent 100%);
+        }
+
+        .logo {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: var(--accent);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: none;
+            letter-spacing: 1px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Section Styling */
+        section {
+            padding: 120px 0;
+        }
+
+        .section-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: var(--accent);
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 600;
+            margin-bottom: 48px;
+        }
+
+        /* Introduction Section */
+        .intro-section {
+            padding-top: 60px;
+        }
+
+        .intro-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: start;
+        }
+
+        .intro-text p {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 15px;
+        }
+
+        .intro-text p:first-of-type::first-letter {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--accent);
+            float: left;
+            line-height: 1;
+            margin-right: 12px;
+            margin-top: 4px;
+        }
+
+        /* Tech Widget */
+        .tech-widget {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 40px;
+            position: sticky;
+            top: 120px;
+        }
+
+        .tech-widget h3 {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            font-weight: 400;
+        }
+
+        .tech-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+        }
+
+        .tech-item:hover {
+            background: rgba(255,255,255,0.05);
+            transform: translateX(8px);
+        }
+
+        .tech-item.active {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .tech-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            font-weight: 700;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .tech-item:hover .tech-icon {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .tech-icon.java {
+            background: linear-gradient(135deg, var(--java-orange) 0%, #e77f11 100%);
+            color: white;
+        }
+
+        .tech-icon.javafx {
+            background: linear-gradient(135deg, var(--javafx-blue) 0%, #3d6a8a 100%);
+            color: white;
+        }
+
+        .tech-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .tech-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .tech-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+        }
+
+        .tech-item.active .tech-details {
+            max-height: 200px;
+        }
+
+        .tech-details-inner {
+            padding-top: 16px;
+            margin-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .tech-details-inner p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Notes Section */
+        .notes-section {
+            background: var(--bg-secondary);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        .note-card {
+            padding: 32px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.4s ease;
+        }
+
+        .note-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .note-number {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .note-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .note-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Game Section */
+        .game-section {
+            background: linear-gradient(180deg, var(--bg-primary) 0%, #0d0d14 100%);
+            padding: 120px 0;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .game-wrapper {
+            position: relative;
+            border: 1px solid rgba(92, 225, 230, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(92, 225, 230, 0.1);
+        }
+
+        #game-canvas {
+            display: block;
+            background: #050508;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .key {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            padding: 0 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--accent);
+        }
+
+        .control-item span:last-child {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 48px;
+            padding: 20px 32px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* Features Section */
+        .features-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 32px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            padding-left: 20px;
+        }
+
+        .feature-item:hover .feature-arrow {
+            transform: translateX(8px);
+            opacity: 1;
+        }
+
+        .feature-name {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .feature-arrow {
+            font-family: 'Space Mono', monospace;
+            color: var(--accent);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Footer */
+        footer {
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        footer p {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .intro-grid {
+                grid-template-columns: 1fr;
+                gap: 60px;
+            }
+
+            .tech-widget {
+                position: relative;
+                top: 0;
+            }
+
+            .notes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                padding: 20px;
+            }
+
+            .container {
+                padding: 0 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section with Intro Animation -->
+    <section id="hero-section">
+        <canvas id="hero-canvas"></canvas>
+        <div class="press-space" id="press-space-text">PRESS SPACE TO BEGIN</div>
+    </section>
+
+    <!-- Starfield -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">ASTEROID.GAME</div>
+        <ul class="nav-links">
+            <li><a href="#intro">About</a></li>
+            <li><a href="#notes">Process</a></li>
+            <li><a href="#play">Play</a></li>
+            <li><a href="#features">Features</a></li>
+        </ul>
+    </nav>
+
+    <!-- Introduction Section -->
+    <section id="intro" class="intro-section">
+        <div class="container">
+            <div class="intro-grid">
+                <div class="intro-text">
+                    <p class="section-label">01 — INTRODUCTION</p>
+                    <h2 class="section-title">Building the Game</h2>
+                    <p>
+                        This project began as an exploration into game development fundamentals 
+                        using Java's rich ecosystem. The goal was to recreate the timeless 
+                        asteroid-dodging experience while learning about real-time graphics 
+                        rendering, collision detection, and game loop architecture.
+                    </p>
+                    <p>
+                        JavaFX provided the perfect foundation for building the visual layer. 
+                        Its scene graph architecture made managing game objects intuitive, while 
+                        the animation framework handled smooth frame updates. The Canvas API 
+                        allowed for custom rendering of the spaceship, asteroids, and particle effects.
+                    </p>
+                    <p>
+                        The game implements a component-based entity system, separating concerns 
+                        between rendering, physics, and input handling. This modular approach 
+                        made it easier to iterate on gameplay mechanics and add new features 
+                        without breaking existing functionality.
+                    </p>
+                </div>
+                <div class="tech-widget">
+                    <h3>TECHNOLOGIES USED</h3>
+                    <div class="tech-item" onclick="toggleTech(this)">
+                        <div class="tech-icon java">J</div>
+                        <div class="tech-info">
+                            <h4>Java</h4>
+                            <p>Core programming language</p>
+                        </div>
+                        <div class="tech-details">
+                            <div class="tech-details-inner">
+                                <p>Java provided the object-oriented foundation for the game architecture. Used for implementing game logic, entity management, collision algorithms, and the core game loop running at 60 FPS.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tech-item" onclick="toggleTech(this)">
+                        <div class="tech-icon javafx">FX</div>
+                        <div class="tech-info">
+                            <h4>JavaFX</h4>
+                            <p>Graphics & UI framework</p>
+                        </div>
+                        <div class="tech-details">
+                            <div class="tech-details-inner">
+                                <p>JavaFX handles all visual rendering through its Canvas API. The AnimationTimer class drives the game loop, while the scene graph manages UI elements like score displays and menus.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Development Notes Section -->
+    <section id="notes" class="notes-section">
+        <div class="container">
+            <p class="section-label">02 — DEVELOPMENT NOTES</p>
+            <h2 class="section-title">How It Was Made</h2>
+            <div class="notes-grid">
+                <div class="note-card">
+                    <p class="note-number">001</p>
+                    <h3>Game Loop</h3>
+                    <p>Implemented using JavaFX's AnimationTimer for consistent 60 FPS updates. Each frame calculates delta time for smooth, frame-rate independent movement.</p>
+                </div>
+                <div class="note-card">
+                    <p class="note-number">002</p>
+                    <h3>Collision System</h3>
+                    <p>Circular hitbox detection using distance calculations between entity centers. Optimized with spatial partitioning to reduce unnecessary checks.</p>
+                </div>
+                <div class="note-card">
+                    <p class="note-number">003</p>
+                    <h3>Entity Management</h3>
+                    <p>Object pooling for asteroids and projectiles prevents garbage collection spikes. Factory pattern creates consistent entity instances.</p>
+                </div>
+                <div class="note-card">
+                    <p class="note-number">004</p>
+                    <h3>Input Handling</h3>
+                    <p>Event-driven keyboard input with key state tracking. Supports simultaneous key presses for diagonal movement and shooting.</p>
+                </div>
+                <div class="note-card">
+                    <p class="note-number">005</p>
+                    <h3>Rendering Pipeline</h3>
+                    <p>Double-buffered Canvas rendering eliminates screen tearing. Custom sprite rotation calculated per-frame for smooth visuals.</p>
+                </div>
+                <div class="note-card">
+                    <p class="note-number">006</p>
+                    <h3>State Machine</h3>
+                    <p>Enum-based game states manage transitions between menu, playing, paused, and game over screens cleanly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Playable Game Section -->
+    <section id="play" class="game-section">
+        <div class="container">
+            <p class="section-label">03 — PLAY THE GAME</p>
+            <h2 class="section-title">Try It Yourself</h2>
+            <div class="game-container">
+                <div class="game-stats">
+                    <div class="stat">
+                        <div class="stat-label">SCORE</div>
+                        <div class="stat-value" id="score-display">0</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">LIVES</div>
+                        <div class="stat-value" id="lives-display">3</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">LEVEL</div>
+                        <div class="stat-value" id="level-display">1</div>
+                    </div>
+                </div>
+                <div class="game-wrapper">
+                    <canvas id="game-canvas" width="800" height="500"></canvas>
+                </div>
+                <div class="game-controls">
+                    <div class="control-item">
+                        <span class="key">W</span>
+                        <span>Thrust</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">S</span>
+                        <span>Reverse</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">A</span>
+                        <span>Rotate Left</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">D</span>
+                        <span>Rotate Right</span>
+                    </div>
+                    <div class="control-item">
+                        <span class="key">SPACE</span>
+                        <span>Shoot</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features">
+        <div class="container">
+            <p class="section-label">04 — FEATURES</p>
+            <h2 class="section-title">What's Inside</h2>
+            <div class="features-list">
+                <div class="feature-item">
+                    <span class="feature-name">Procedural asteroid generation</span>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-name">Particle explosion effects</span>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-name">Progressive difficulty scaling</span>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-name">High score persistence</span>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-name">Screen wrap mechanics</span>
+                    <span class="feature-arrow">→</span>
+                </div>
+                <div class="feature-item">
+                    <span class="feature-name">Sound effects integration</span>
+                    <span class="feature-arrow">→</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>BUILT WITH JAVA & JAVAFX</p>
+        </div>
+    </footer>
+
+    <script>
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // ==========================================
+            // HERO INTRO ANIMATION
+            // ==========================================
+            const heroCanvas = document.getElementById('hero-canvas');
+            const heroCtx = heroCanvas.getContext('2d');
+            const heroSection = document.getElementById('hero-section');
+            const pressSpaceText = document.getElementById('press-space-text');
+
+            let heroWidth, heroHeight;
+            let heroState = 'waiting';
+
+            // Ship (small, centered at bottom)
+            const heroShip = { x: 0, y: 0, angle: -Math.PI / 2, size: 12 };
+
+            // Bullet
+            const heroBullet = { active: false, x: 0, y: 0, vy: -10, size: 3 };
+
+            // Asteroids
+            let heroAsteroids = [];
+
+            // Text particles
+            let heroTextParticles = [];
+            let heroFormingStart = 0;
+
+            function resizeHeroCanvas() {
+                heroWidth = window.innerWidth;
+                heroHeight = window.innerHeight;
+                heroCanvas.width = heroWidth;
+                heroCanvas.height = heroHeight;
+                heroShip.x = heroWidth / 2;
+                heroShip.y = heroHeight - 70;
+            }
+
+            // Asteroid fragments that will become text particles
+            let asteroidFragments = [];
+            
+            function createHeroAsteroids() {
+                heroAsteroids = [];
+                const cx = heroWidth / 2;
+                const cy = heroHeight / 2 - 20;
+                // One big asteroid
+                const verts = [];
+                const numV = 12;
+                for (let j = 0; j < numV; j++) {
+                    verts.push({ angle: (j / numV) * Math.PI * 2, radius: 0.75 + Math.random() * 0.25 });
+                }
+                heroAsteroids.push({
+                    x: cx,
+                    y: cy,
+                    size: 80,
+                    rotation: 0,
+                    rotSpeed: 0.003,
+                    vertices: verts,
+                    opacity: 1,
+                    hit: false
+                });
+            }
+            
+            function breakAsteroidIntoPieces() {
+                const asteroid = heroAsteroids[0];
+                asteroidFragments = [];
+                
+                // Create fragments from the asteroid
+                const numFragments = 60;
+                for (let i = 0; i < numFragments; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = Math.random() * asteroid.size * 0.8;
+                    const startX = asteroid.x + Math.cos(angle) * dist;
+                    const startY = asteroid.y + Math.sin(angle) * dist;
+                    
+                    // Explosion velocity - outward from center
+                    const explosionAngle = Math.atan2(startY - asteroid.y, startX - asteroid.x);
+                    const explosionSpeed = 3 + Math.random() * 5;
+                    
+                    asteroidFragments.push({
+                        x: startX,
+                        y: startY,
+                        vx: Math.cos(explosionAngle) * explosionSpeed,
+                        vy: Math.sin(explosionAngle) * explosionSpeed,
+                        size: 4 + Math.random() * 8,
+                        rotation: Math.random() * Math.PI * 2,
+                        rotSpeed: (Math.random() - 0.5) * 0.2,
+                        opacity: 1,
+                        vertices: generateSmallAsteroidVerts()
+                    });
+                }
+            }
+            
+            function generateSmallAsteroidVerts() {
+                const verts = [];
+                const numV = 5 + Math.floor(Math.random() * 3);
+                for (let j = 0; j < numV; j++) {
+                    verts.push({ angle: (j / numV) * Math.PI * 2, radius: 0.6 + Math.random() * 0.4 });
+                }
+                return verts;
+            }
+
+            function getHeroTextPositions(text) {
+                const tmp = document.createElement('canvas');
+                const tctx = tmp.getContext('2d');
+                tmp.width = heroWidth;
+                tmp.height = heroHeight;
+                const fs = Math.min(heroWidth / 7, 120);
+                tctx.font = `800 ${fs}px 'Syne', sans-serif`;
+                tctx.fillStyle = 'white';
+                tctx.textAlign = 'center';
+                tctx.textBaseline = 'middle';
+                tctx.fillText(text, heroWidth / 2, heroHeight / 2 - 20);
+                const imgData = tctx.getImageData(0, 0, heroWidth, heroHeight);
+                const pos = [];
+                const gap = 5;
+                for (let y = 0; y < heroHeight; y += gap) {
+                    for (let x = 0; x < heroWidth; x += gap) {
+                        if (imgData.data[(y * heroWidth + x) * 4 + 3] > 128) {
+                            pos.push({ x, y });
+                        }
+                    }
+                }
+                return pos;
+            }
+
+            function createHeroTextParticles() {
+                const positions = getHeroTextPositions('ASTEROID GAME');
+                const asteroid = heroAsteroids[0];
+                const cx = asteroid ? asteroid.x : heroWidth / 2;
+                const cy = asteroid ? asteroid.y : heroHeight / 2;
+                
+                // Create rock fragments that will form text
+                asteroidFragments = [];
+                
+                for (let i = 0; i < positions.length; i++) {
+                    // Start from asteroid center with explosion velocity
+                    const angle = Math.random() * Math.PI * 2;
+                    const explosionSpeed = 4 + Math.random() * 6;
+                    
+                    asteroidFragments.push({
+                        x: cx + (Math.random() - 0.5) * 40,
+                        y: cy + (Math.random() - 0.5) * 40,
+                        vx: Math.cos(angle) * explosionSpeed,
+                        vy: Math.sin(angle) * explosionSpeed,
+                        targetX: positions[i].x,
+                        targetY: positions[i].y,
+                        size: 3 + Math.random() * 4,
+                        rotation: Math.random() * Math.PI * 2,
+                        rotSpeed: (Math.random() - 0.5) * 0.15,
+                        opacity: 1,
+                        vertices: generateSmallAsteroidVerts(),
+                        forming: false
+                    });
+                }
+                heroFormingStart = Date.now();
+            }
+
+            function drawHeroStars() {
+                for (let i = 0; i < 100; i++) {
+                    const x = (i * 137.508) % heroWidth;
+                    const y = (i * 73.254) % heroHeight;
+                    const sz = (i % 3) * 0.3 + 0.3;
+                    const op = 0.15 + Math.sin(Date.now() * 0.0008 + i) * 0.15;
+                    heroCtx.beginPath();
+                    heroCtx.arc(x, y, sz, 0, Math.PI * 2);
+                    heroCtx.fillStyle = `rgba(255,255,255,${op})`;
+                    heroCtx.fill();
+                }
+            }
+
+            function drawHeroShip() {
+                heroCtx.save();
+                heroCtx.translate(heroShip.x, heroShip.y);
+                heroCtx.rotate(heroShip.angle);
+                heroCtx.beginPath();
+                heroCtx.moveTo(heroShip.size, 0);
+                heroCtx.lineTo(-heroShip.size * 0.7, -heroShip.size * 0.5);
+                heroCtx.lineTo(-heroShip.size * 0.35, 0);
+                heroCtx.lineTo(-heroShip.size * 0.7, heroShip.size * 0.5);
+                heroCtx.closePath();
+                heroCtx.fillStyle = '#1a1a24';
+                heroCtx.fill();
+                heroCtx.strokeStyle = '#5ce1e6';
+                heroCtx.lineWidth = 1.5;
+                heroCtx.stroke();
+                heroCtx.restore();
+            }
+
+            function drawHeroBullet() {
+                if (!heroBullet.active) return;
+                heroCtx.beginPath();
+                heroCtx.arc(heroBullet.x, heroBullet.y, heroBullet.size, 0, Math.PI * 2);
+                heroCtx.fillStyle = '#5ce1e6';
+                heroCtx.fill();
+                heroCtx.beginPath();
+                heroCtx.arc(heroBullet.x, heroBullet.y, heroBullet.size + 2, 0, Math.PI * 2);
+                heroCtx.fillStyle = 'rgba(92,225,230,0.3)';
+                heroCtx.fill();
+            }
+
+            function drawHeroAsteroids() {
+                heroAsteroids.forEach(a => {
+                    if (a.opacity <= 0) return;
+                    heroCtx.save();
+                    heroCtx.translate(a.x, a.y);
+                    heroCtx.rotate(a.rotation);
+                    heroCtx.globalAlpha = a.opacity;
+                    
+                    // Draw crater details first (behind)
+                    const craters = [
+                        { x: -20, y: -15, r: 12 },
+                        { x: 25, y: 10, r: 8 },
+                        { x: -10, y: 25, r: 10 },
+                        { x: 15, y: -25, r: 6 }
+                    ];
+                    
+                    // Main asteroid body
+                    heroCtx.beginPath();
+                    a.vertices.forEach((v, i) => {
+                        const px = Math.cos(v.angle) * a.size * v.radius;
+                        const py = Math.sin(v.angle) * a.size * v.radius;
+                        if (i === 0) heroCtx.moveTo(px, py);
+                        else heroCtx.lineTo(px, py);
+                    });
+                    heroCtx.closePath();
+                    
+                    // Gradient fill for 3D look
+                    const grad = heroCtx.createRadialGradient(-20, -20, 0, 0, 0, a.size);
+                    grad.addColorStop(0, '#4a4a5a');
+                    grad.addColorStop(0.5, '#2a2a3a');
+                    grad.addColorStop(1, '#1a1a24');
+                    heroCtx.fillStyle = grad;
+                    heroCtx.fill();
+                    heroCtx.strokeStyle = '#5a5a6a';
+                    heroCtx.lineWidth = 2;
+                    heroCtx.stroke();
+                    
+                    // Draw craters
+                    craters.forEach(c => {
+                        heroCtx.beginPath();
+                        heroCtx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+                        heroCtx.fillStyle = 'rgba(20,20,30,0.6)';
+                        heroCtx.fill();
+                        heroCtx.beginPath();
+                        heroCtx.arc(c.x + 2, c.y + 2, c.r * 0.7, 0, Math.PI * 2);
+                        heroCtx.fillStyle = 'rgba(10,10,15,0.4)';
+                        heroCtx.fill();
+                    });
+                    
+                    heroCtx.restore();
+                    a.rotation += a.rotSpeed;
+                });
+            }
+            
+            function drawAsteroidFragments() {
+                asteroidFragments.forEach(f => {
+                    heroCtx.save();
+                    heroCtx.translate(f.x, f.y);
+                    heroCtx.rotate(f.rotation);
+                    heroCtx.globalAlpha = f.opacity;
+                    
+                    heroCtx.beginPath();
+                    f.vertices.forEach((v, i) => {
+                        const px = Math.cos(v.angle) * f.size * v.radius;
+                        const py = Math.sin(v.angle) * f.size * v.radius;
+                        if (i === 0) heroCtx.moveTo(px, py);
+                        else heroCtx.lineTo(px, py);
+                    });
+                    heroCtx.closePath();
+                    heroCtx.fillStyle = '#3a3a4a';
+                    heroCtx.fill();
+                    heroCtx.strokeStyle = '#5a5a6a';
+                    heroCtx.lineWidth = 1;
+                    heroCtx.stroke();
+                    
+                    heroCtx.restore();
+                });
+            }
+            
+            function updateAsteroidFragments() {
+                // Only used during breaking state - not needed now
+            }
+
+            function drawHeroTextParticles() {
+                // No longer used - rock fragments draw the text now
+            }
+
+            function easeOutQuart(t) {
+                return 1 - Math.pow(1 - t, 4);
+            }
+
+            function updateHero() {
+                if (heroState === 'shooting') {
+                    heroBullet.y += heroBullet.vy;
+                    const a = heroAsteroids[0];
+                    if (a && a.opacity > 0 && !a.hit) {
+                        const dx = heroBullet.x - a.x;
+                        const dy = heroBullet.y - a.y;
+                        if (Math.hypot(dx, dy) < a.size + heroBullet.size) {
+                            a.hit = true;
+                            a.opacity = 0;
+                            heroBullet.active = false;
+                            createHeroTextParticles();
+                            heroState = 'forming';
+                        }
+                    }
+                    if (heroBullet.y < -20) {
+                        heroBullet.active = false;
+                    }
+                }
+
+                if (heroState === 'forming') {
+                    const elapsed = Date.now() - heroFormingStart;
+                    const duration = 2200;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Phase 1: Explosion outward (0-30%)
+                    // Phase 2: Slow down and start pulling to targets (30-100%)
+                    
+                    asteroidFragments.forEach((f, i) => {
+                        if (progress < 0.3) {
+                            // Explosion phase
+                            f.x += f.vx;
+                            f.y += f.vy;
+                            f.vx *= 0.96;
+                            f.vy *= 0.96;
+                            f.rotation += f.rotSpeed;
+                        } else {
+                            // Forming phase - pull towards target
+                            const formProgress = (progress - 0.3) / 0.7;
+                            const ease = easeOutQuart(formProgress);
+                            
+                            // Slow down velocity
+                            f.vx *= 0.9;
+                            f.vy *= 0.9;
+                            
+                            // Pull towards target
+                            const pullStrength = 0.06 + ease * 0.08;
+                            f.x += (f.targetX - f.x) * pullStrength;
+                            f.y += (f.targetY - f.y) * pullStrength;
+                            
+                            // Slow down rotation as it settles
+                            f.rotSpeed *= 0.95;
+                            f.rotation += f.rotSpeed;
+                        }
+                    });
+
+                    if (progress >= 1) {
+                        // Snap to final positions
+                        asteroidFragments.forEach(f => {
+                            f.x = f.targetX;
+                            f.y = f.targetY;
+                            f.rotSpeed = 0;
+                        });
+                        heroState = 'complete';
+                        setTimeout(() => {
+                            document.getElementById('intro').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 1000);
+                    }
+                }
+            }
+
+            function heroLoop() {
+                heroCtx.fillStyle = '#0a0a0f';
+                heroCtx.fillRect(0, 0, heroWidth, heroHeight);
+                drawHeroStars();
+                drawHeroAsteroids();
+                drawAsteroidFragments();
+                if (heroState === 'waiting' || heroState === 'shooting') {
+                    drawHeroShip();
+                }
+                drawHeroBullet();
+                drawHeroTextParticles();
+                updateHero();
+                requestAnimationFrame(heroLoop);
+            }
+
+            function startHeroAnimation() {
+                if (heroState !== 'waiting') return;
+                pressSpaceText.classList.add('hidden');
+                heroState = 'shooting';
+                heroBullet.active = true;
+                heroBullet.x = heroShip.x;
+                heroBullet.y = heroShip.y - heroShip.size;
+            }
+
+            resizeHeroCanvas();
+            createHeroAsteroids();
+            heroLoop();
+
+            window.addEventListener('resize', () => {
+                resizeHeroCanvas();
+                if (heroState === 'waiting') createHeroAsteroids();
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && heroState === 'waiting') {
+                    e.preventDefault();
+                    startHeroAnimation();
+                }
+            });
+
+            heroSection.addEventListener('click', startHeroAnimation);
+
+            // ==========================================
+            // ASTEROID GAME
+            // ==========================================
+            const gameCanvas = document.getElementById('game-canvas');
+            const ctx = gameCanvas.getContext('2d');
+            const GAME_WIDTH = 800;
+            const GAME_HEIGHT = 500;
+
+            let score = 0, lives = 3, level = 1;
+            let gameOver = false, gamePaused = true, gameStarted = false;
+
+            const ship = {
+                x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2,
+                angle: -Math.PI / 2,
+                rotationSpeed: 0.08,
+                thrust: 0.12,
+                friction: 0.99,
+                vx: 0, vy: 0,
+                size: 15,
+                invincible: false,
+                invincibleTimer: 0
+            };
+
+            let bullets = [];
+            const bulletSpeed = 8, bulletLife = 60;
+            let canShoot = true, shootCooldown = 15, shootTimer = 0;
+
+            let asteroids = [];
+            let particles = [];
+            const keys = {};
+
+            function genAsteroidVerts() {
+                const v = [];
+                const n = 8 + Math.floor(Math.random() * 4);
+                for (let i = 0; i < n; i++) {
+                    v.push({ angle: (i / n) * Math.PI * 2, radius: 0.7 + Math.random() * 0.3 });
+                }
+                return v;
+            }
+
+            function createAsteroid(x, y, size) {
+                const ang = Math.random() * Math.PI * 2;
+                const spd = (4 - size) * 0.5 + Math.random() * 1.5;
+                return {
+                    x: x !== undefined ? x : Math.random() * GAME_WIDTH,
+                    y: y !== undefined ? y : Math.random() * GAME_HEIGHT,
+                    vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd,
+                    size: size || 3,
+                    radius: size === 3 ? 40 : size === 2 ? 25 : 15,
+                    rotation: Math.random() * Math.PI * 2,
+                    rotationSpeed: (Math.random() - 0.5) * 0.04,
+                    vertices: genAsteroidVerts()
+                };
+            }
+
+            function spawnAsteroids(count) {
+                for (let i = 0; i < count; i++) {
+                    let x, y;
+                    do {
+                        x = Math.random() * GAME_WIDTH;
+                        y = Math.random() * GAME_HEIGHT;
+                    } while (Math.hypot(x - ship.x, y - ship.y) < 150);
+                    asteroids.push(createAsteroid(x, y, 3));
+                }
+            }
+
+            function createParticle(x, y, color) {
+                const ang = Math.random() * Math.PI * 2;
+                const spd = Math.random() * 4 + 1;
+                return { x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, life: 30 + Math.random() * 20, maxLife: 50, size: Math.random() * 3 + 1, color: color || '#5ce1e6' };
+            }
+
+            function shoot() {
+                if (!canShoot || gameOver || gamePaused) return;
+                bullets.push({
+                    x: ship.x + Math.cos(ship.angle) * ship.size,
+                    y: ship.y + Math.sin(ship.angle) * ship.size,
+                    vx: Math.cos(ship.angle) * bulletSpeed + ship.vx * 0.5,
+                    vy: Math.sin(ship.angle) * bulletSpeed + ship.vy * 0.5,
+                    life: bulletLife
+                });
+                canShoot = false;
+                shootTimer = shootCooldown;
+            }
+
+            function wrapPos(obj) {
+                if (obj.x < 0) obj.x = GAME_WIDTH;
+                if (obj.x > GAME_WIDTH) obj.x = 0;
+                if (obj.y < 0) obj.y = GAME_HEIGHT;
+                if (obj.y > GAME_HEIGHT) obj.y = 0;
+            }
+
+            function checkColl(o1, o2, r1, r2) {
+                return Math.hypot(o1.x - o2.x, o1.y - o2.y) < r1 + r2;
+            }
+
+            function hitAsteroid(ast, idx) {
+                for (let i = 0; i < 10; i++) particles.push(createParticle(ast.x, ast.y, '#6b6b7a'));
+                score += (4 - ast.size) * 20;
+                document.getElementById('score-display').textContent = score;
+                if (ast.size > 1) {
+                    for (let i = 0; i < 2; i++) asteroids.push(createAsteroid(ast.x, ast.y, ast.size - 1));
+                }
+                asteroids.splice(idx, 1);
+                if (asteroids.length === 0) {
+                    level++;
+                    document.getElementById('level-display').textContent = level;
+                    spawnAsteroids(3 + level);
+                }
+            }
+
+            function hitShip() {
+                if (ship.invincible) return;
+                lives--;
+                document.getElementById('lives-display').textContent = lives;
+                for (let i = 0; i < 20; i++) particles.push(createParticle(ship.x, ship.y, '#5ce1e6'));
+                if (lives <= 0) {
+                    gameOver = true;
+                } else {
+                    ship.x = GAME_WIDTH / 2; ship.y = GAME_HEIGHT / 2;
+                    ship.vx = 0; ship.vy = 0;
+                    ship.angle = -Math.PI / 2;
+                    ship.invincible = true;
+                    ship.invincibleTimer = 180;
+                }
+            }
+
+            function resetGame() {
+                score = 0; lives = 3; level = 1;
+                gameOver = false;
+                bullets = []; asteroids = []; particles = [];
+                ship.x = GAME_WIDTH / 2; ship.y = GAME_HEIGHT / 2;
+                ship.vx = 0; ship.vy = 0;
+                ship.angle = -Math.PI / 2;
+                ship.invincible = true;
+                ship.invincibleTimer = 120;
+                document.getElementById('score-display').textContent = '0';
+                document.getElementById('lives-display').textContent = '3';
+                document.getElementById('level-display').textContent = '1';
+                spawnAsteroids(4);
+            }
+
+            function update() {
+                if (gamePaused || gameOver) return;
+
+                if (keys['KeyA'] || keys['ArrowLeft']) ship.angle -= ship.rotationSpeed;
+                if (keys['KeyD'] || keys['ArrowRight']) ship.angle += ship.rotationSpeed;
+
+                if (keys['KeyW'] || keys['ArrowUp']) {
+                    ship.vx += Math.cos(ship.angle) * ship.thrust;
+                    ship.vy += Math.sin(ship.angle) * ship.thrust;
+                    if (Math.random() > 0.5) {
+                        particles.push({ x: ship.x - Math.cos(ship.angle) * ship.size, y: ship.y - Math.sin(ship.angle) * ship.size, vx: -Math.cos(ship.angle) * 2 + (Math.random() - 0.5), vy: -Math.sin(ship.angle) * 2 + (Math.random() - 0.5), life: 20, maxLife: 20, size: 3, color: '#f89820' });
+                    }
+                }
+
+                if (keys['KeyS'] || keys['ArrowDown']) {
+                    ship.vx -= Math.cos(ship.angle) * ship.thrust * 0.6;
+                    ship.vy -= Math.sin(ship.angle) * ship.thrust * 0.6;
+                    if (Math.random() > 0.7) {
+                        particles.push({ x: ship.x + Math.cos(ship.angle) * ship.size * 0.5, y: ship.y + Math.sin(ship.angle) * ship.size * 0.5, vx: Math.cos(ship.angle) * 1.5 + (Math.random() - 0.5), vy: Math.sin(ship.angle) * 1.5 + (Math.random() - 0.5), life: 15, maxLife: 15, size: 2, color: '#5ce1e6' });
+                    }
+                }
+
+                ship.vx *= ship.friction;
+                ship.vy *= ship.friction;
+                ship.x += ship.vx;
+                ship.y += ship.vy;
+                wrapPos(ship);
+
+                if (ship.invincible) {
+                    ship.invincibleTimer--;
+                    if (ship.invincibleTimer <= 0) ship.invincible = false;
+                }
+
+                if (!canShoot) {
+                    shootTimer--;
+                    if (shootTimer <= 0) canShoot = true;
+                }
+
+                bullets = bullets.filter(b => { b.x += b.vx; b.y += b.vy; b.life--; wrapPos(b); return b.life > 0; });
+                asteroids.forEach(a => { a.x += a.vx; a.y += a.vy; a.rotation += a.rotationSpeed; wrapPos(a); });
+                particles = particles.filter(p => { p.x += p.vx; p.y += p.vy; p.vx *= 0.98; p.vy *= 0.98; p.life--; return p.life > 0; });
+
+                for (let i = asteroids.length - 1; i >= 0; i--) {
+                    for (let j = bullets.length - 1; j >= 0; j--) {
+                        if (checkColl(bullets[j], asteroids[i], 3, asteroids[i].radius)) {
+                            bullets.splice(j, 1);
+                            hitAsteroid(asteroids[i], i);
+                            break;
+                        }
+                    }
+                }
+
+                if (!ship.invincible) {
+                    for (let i = 0; i < asteroids.length; i++) {
+                        if (checkColl(ship, asteroids[i], ship.size, asteroids[i].radius * 0.8)) {
+                            hitShip();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            function drawShip() {
+                if (gameOver) return;
+                ctx.save();
+                ctx.translate(ship.x, ship.y);
+                ctx.rotate(ship.angle);
+                if (ship.invincible && Math.floor(ship.invincibleTimer / 5) % 2 === 0) ctx.globalAlpha = 0.3;
+                ctx.beginPath();
+                ctx.moveTo(ship.size, 0);
+                ctx.lineTo(-ship.size * 0.8, -ship.size * 0.6);
+                ctx.lineTo(-ship.size * 0.4, 0);
+                ctx.lineTo(-ship.size * 0.8, ship.size * 0.6);
+                ctx.closePath();
+                ctx.fillStyle = '#12121a';
+                ctx.fill();
+                ctx.strokeStyle = '#5ce1e6';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            function drawBullets() {
+                bullets.forEach(b => {
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, 3, 0, Math.PI * 2);
+                    ctx.fillStyle = '#5ce1e6';
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(92,225,230,0.3)';
+                    ctx.fill();
+                });
+            }
+
+            function drawAsteroids() {
+                asteroids.forEach(a => {
+                    ctx.save();
+                    ctx.translate(a.x, a.y);
+                    ctx.rotate(a.rotation);
+                    ctx.beginPath();
+                    a.vertices.forEach((v, i) => {
+                        const px = Math.cos(v.angle) * a.radius * v.radius;
+                        const py = Math.sin(v.angle) * a.radius * v.radius;
+                        if (i === 0) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    });
+                    ctx.closePath();
+                    ctx.fillStyle = '#1a1a24';
+                    ctx.fill();
+                    ctx.strokeStyle = '#4a4a5a';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.restore();
+                });
+            }
+
+            function drawParticles() {
+                particles.forEach(p => {
+                    const alpha = p.life / p.maxLife;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = alpha;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                });
+            }
+
+            function drawUI() {
+                if (gameOver) {
+                    ctx.fillStyle = 'rgba(10,10,15,0.8)';
+                    ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+                    ctx.font = 'bold 48px Syne';
+                    ctx.fillStyle = '#5ce1e6';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('GAME OVER', GAME_WIDTH / 2, GAME_HEIGHT / 2 - 30);
+                    ctx.font = '18px Space Mono';
+                    ctx.fillStyle = '#6b6b7a';
+                    ctx.fillText('Final Score: ' + score, GAME_WIDTH / 2, GAME_HEIGHT / 2 + 20);
+                    ctx.fillText('Press ENTER to restart', GAME_WIDTH / 2, GAME_HEIGHT / 2 + 60);
+                } else if (gamePaused && !gameStarted) {
+                    ctx.fillStyle = 'rgba(10,10,15,0.6)';
+                    ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+                    ctx.font = '20px Space Mono';
+                    ctx.fillStyle = '#5ce1e6';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Click to Play', GAME_WIDTH / 2, GAME_HEIGHT / 2);
+                }
+            }
+
+            function draw() {
+                ctx.fillStyle = '#050508';
+                ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+                for (let i = 0; i < 80; i++) {
+                    const x = (i * 97.3) % GAME_WIDTH;
+                    const y = (i * 53.7) % GAME_HEIGHT;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 0.5 + (i % 2) * 0.5, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255,255,255,' + (0.2 + (i % 3) * 0.15) + ')';
+                    ctx.fill();
+                }
+                drawParticles();
+                drawAsteroids();
+                drawBullets();
+                drawShip();
+                drawUI();
+            }
+
+            function gameLoop() {
+                update();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+
+            window.addEventListener('keydown', (e) => {
+                keys[e.code] = true;
+                if (e.code === 'Space' && !gamePaused && !gameOver) {
+                    e.preventDefault();
+                    shoot();
+                }
+                if (e.code === 'Enter' && gameOver) resetGame();
+            });
+
+            window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+            gameCanvas.addEventListener('click', () => {
+                if (!gameStarted) {
+                    gameStarted = true;
+                    gamePaused = false;
+                    resetGame();
+                } else if (gameOver) {
+                    resetGame();
+                }
+            });
+
+            gameLoop();
+
+            // ==========================================
+            // PORTFOLIO FUNCTIONALITY
+            // ==========================================
+            function createStars() {
+                const container = document.getElementById('stars');
+                if (!container) return;
+                for (let i = 0; i < 100; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    const sz = Math.random() * 2 + 1;
+                    star.style.width = sz + 'px';
+                    star.style.height = sz + 'px';
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = Math.random() * 100 + '%';
+                    star.style.animationDelay = Math.random() * 3 + 's';
+                    star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    container.appendChild(star);
+                }
+            }
+
+            window.toggleTech = function(element) {
+                const allItems = document.querySelectorAll('.tech-item');
+                allItems.forEach(item => {
+                    if (item !== element) item.classList.remove('active');
+                });
+                element.classList.toggle('active');
+            };
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            });
+
+            const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.note-card, .feature-item').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+
+            createStars();
+        });
+    </script>
+</body>
+</html>
